@@ -2,15 +2,13 @@
   <div>Content start</div>
   <div *ifRight="s; else nothing; let v">
     Content loaded: {{v|json}}
-    <div>Should have compilation error as no 'abra' prop on Person: {{v.abra}}</div>
+    <div>Has compilation error as no 'abra' prop on Person: v.abra</div>
   </div>
   <div>Content end</div>
 
-  <ng-template #nothing let-v>
+  <ng-template #nothing let-v appTemplateContextImplicit>
     <div>Error happend: {{v|json}}</div>
-    <div>Should have compilation error as no 'abra' prop on Err: {{v.abra}}</div>    
+    <div>Should have compilation error as no 'abra' prop on Err: {{v.abra}}</div>
   </ng-template>
+
 </div>
-
-  
-

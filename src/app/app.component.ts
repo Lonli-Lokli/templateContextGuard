@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
+import { Either, left, right } from '@sweet-monads/either';
 import { Observable, of } from 'rxjs';
 import { mergeMap, delay, takeUntil, startWith } from 'rxjs/operators';
-import { Either, left, right } from './either';
 
 export interface Person {
   name: string;

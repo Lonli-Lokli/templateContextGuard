@@ -1,90 +1,102 @@
-import { Directive, EmbeddedViewRef, Input, TemplateRef, ViewContainerRef } from '@angular/core';
-import { Either } from './either';
+import { Directive, Input, ViewContainerRef, TemplateRef } from '@angular/core';
+import { Either } from '@sweet-monads/either';
+import { IfContext, initialIfContext, initialRefs, updateView } from './common';
 
-export interface IfContext<T> {
-    $implicit: T;
-    ifTrue: boolean;
-}
-
-export const initialIfContext = <T>(): IfContext<T | null> => ({
-    $implicit: null,
-    ifTrue: false,
-});
-
-export interface Refs<T> {
-    viewContainer: ViewContainerRef;
-    thenTemplateRef: TemplateRef<IfContext<T>> | null;
-    elseTemplateRef: TemplateRef<IfContext<T>> | null;
-    thenViewRef: EmbeddedViewRef<IfContext<T>> | null;
-    elseViewRef: EmbeddedViewRef<IfContext<T>> | null;
-}
-export const initialRefs = <T>(): Refs<T> => ({
-    viewContainer: null,
-    thenTemplateRef: null,
-    elseTemplateRef: null,
-    thenViewRef: null,
-    elseViewRef: null,
-});
-
-export function updateView<T>(context: IfContext<T>, refs: Refs<T>) {
-    if (context.ifTrue) {
-        if (!refs.thenViewRef) {
-            refs.viewContainer.clear();
-            refs.elseViewRef = null;
-            if (refs.thenTemplateRef) {
-                refs.thenViewRef = refs.viewContainer.createEmbeddedView(refs.thenTemplateRef, context);
-            }
-        }
-    } else {
-        if (!refs.elseViewRef) {
-            refs.viewContainer.clear();
-            refs.thenViewRef = null;
-            if (refs.elseTemplateRef) {
-                refs.elseViewRef = refs.viewContainer.createEmbeddedView(refs.elseTemplateRef, context);
-            }
-        }
-    }
-}
 @Directive({ selector: '[ifRight]' })
-export class IfRightDirective<TL = any, TR = any> {
+export class IfRightDirective<TE = unknown, TD = unknown> {
+  private _context: IfContext<TE | TD> = initialIfContext();
 
-    constructor(viewContainer: ViewContainerRef, templateRef: TemplateRef<IfContext<TL|TR>>) {
-        this.refs.viewContainer = viewContainer;
-        this.refs.thenTemplateRef = templateRef;
+  private _refs = initialRefs();
+
+  constructor(viewContainer: ViewContainerRef, templateRef: TemplateRef<IfContext<TE | TD>>) {
+    this._refs.viewContainer = viewContainer;
+    this._refs.thenTemplateRef = templateRef;
+  }
+
+  @Input()
+  set ifRight(either: Either<TE, TD> | null) {
+    if (either) {
+      either
+        .mapLeft(l => {
+          this._context.ifTrue = false;
+          this._context.$implicit = l;
+        })
+        .mapRight(r => {
+          this._context.ifTrue = true;
+          this._context.$implicit = r;
+        });
     }
+    updateView(this._context, this._refs);
+  }
 
-    @Input()
-    set ifRight(either: Either<TL, TR>) {
-        if (either.isRight()) {
-            this.context.ifTrue = true;
-            this.context.$implicit = either.value;
-        } else {
-            this.context.ifTrue = false;
-            this.context.$implicit = either.value;
-        }
-        updateView(this.context, this.refs);
+  @Input()
+  set ifRightThen(templateRef: TemplateRef<IfContext<TE | TD>> | null) {
+    this._refs.thenTemplateRef = templateRef;
+    this._refs.thenViewRef = null;
+    updateView(this._context, this._refs);
+  }
+
+  @Input()
+  set ifRightElse(templateRef: TemplateRef<IfContext<TE | TD>> | null) {
+    this._refs.elseTemplateRef = templateRef;
+    this._refs.elseViewRef = null;
+    updateView(this._context, this._refs);
+  }
+
+  static ngTemplateGuard_ifRight: 'binding';
+
+  static ngTemplateContextGuard<TE, TD>(
+    _dir: IfRightDirective<TE, TD>,
+    _ctx: any
+  ): _ctx is IfContext<Exclude<TD, false | 0 | '' | null | undefined>> {
+    return true;
+  }
+}
+
+@Directive({ selector: '[ifLeft]' })
+export class IfLeftDirective<TE = unknown, TD = unknown> {
+  private context = initialIfContext();
+
+  private refs = initialRefs();
+
+  constructor(viewContainer: ViewContainerRef, templateRef: TemplateRef<IfContext<TE | TD>>) {
+    this.refs.viewContainer = viewContainer;
+    this.refs.thenTemplateRef = templateRef;
+  }
+
+  @Input()
+  set ifLeft(either: Either<TE, TD> | null) {
+    if (either) {
+      either
+        .mapLeft(l => {
+          this.context.ifTrue = true;
+          this.context.$implicit = l;
+        })
+        .mapRight(r => {
+          this.context.ifTrue = false;
+          this.context.$implicit = r;
+        });
     }
+    updateView(this.context, this.refs);
+  }
 
-    @Input()
-    set ifRightThen(templateRef: TemplateRef<IfContext<TL|TR>> | null) {
-        this.refs.thenTemplateRef = templateRef;
-        this.refs.thenViewRef = null;
-        updateView(this.context, this.refs);
-    }
+  @Input()
+  set ifLeftThen(templateRef: TemplateRef<IfContext<TE | TD>> | null) {
+    this.refs.thenTemplateRef = templateRef;
+    this.refs.thenViewRef = null;
+    updateView(this.context, this.refs);
+  }
 
-    @Input()
-    set ifRightElse(templateRef: TemplateRef<IfContext<TL|TR>> | null) {
-        this.refs.elseTemplateRef = templateRef;
-        this.refs.elseViewRef = null;
-        updateView(this.context, this.refs);
-    }
+  @Input()
+  set ifLeftElse(templateRef: TemplateRef<IfContext<TE | TD>> | null) {
+    this.refs.elseTemplateRef = templateRef;
+    this.refs.elseViewRef = null;
+    updateView(this.context, this.refs);
+  }
 
+  static ngTemplateGuard_ifLeft: 'binding';
 
-    // tslint:disable-next-line: variable-name
-    static ngTemplateGuard_ifRight: 'binding';
-    private context = initialIfContext();
-
-    private refs = initialRefs();
-
-    static ngTemplateContextGuard<TL, TR>(dir: IfRightDirective<TL, TR>, ctx: unknown): ctx is IfContext<TR> { return true; }
+  static ngTemplateContextGuard<TE, TD>(_dir: IfRightDirective<TE, TD>, _ctx: any): _ctx is IfContext<TE> {
+    return true;
+  }
 }

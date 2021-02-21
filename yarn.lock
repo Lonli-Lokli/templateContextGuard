@@ -1175,6 +1175,18 @@
     semver "7.3.2"
     semver-intersect "1.4.0"
 
+"@sweet-monads/either@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@sweet-monads/either/-/either-2.3.0.tgz#71664e479cf537a3df3996a399e1a369dd4c1858"
+  integrity sha512-I44sGdGqJAx8NT5jq4Y6TLL3nVpWpqSKuhj3a/Vwgb4bWMiYUX762F+2lovdGUbiDBWni04MUA7/ZWo4y9Z6bA==
+  dependencies:
+    "@sweet-monads/interfaces" "^2.3.0"
+
+"@sweet-monads/interfaces@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@sweet-monads/interfaces/-/interfaces-2.3.0.tgz#3b8ade592630fe8e9666f227d84549203dafd264"
+  integrity sha512-ou9GHjkca1Zh4dSeIG8nmKE7T6Eao2x4Ouj7YTq0nFHA+WwYfvTnhCiUh9+cRz0BTLBRYOLsFlyax05VegSsYQ==
+
 "@types/glob@^7.1.1":
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.3.tgz#e6ba80f36b7daad2c685acd9266382e68985c183"
